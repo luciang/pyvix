@@ -234,7 +234,7 @@ def test_VM_loginInGuest_plusCopyAndRun():
     py.test.raises(VIXSecurityException,
         vm.loginInGuest, 'Administrator', 'BOGUS_PASSWORD'
       )
-    vm.loginInGuest('Administrator', 'pass')
+    vm.loginInGuest(site_config.guest_username, site_config.guest_password)
     print 'Logged into guest.'
 
     # Copy an innocuous batch file from the host to the guest, execute it, then
@@ -246,11 +246,10 @@ def test_VM_loginInGuest_plusCopyAndRun():
     DUMMY_PROGRAM_DEST_PATH_HOST = os.path.join(
         tempfile.gettempdir(), DUMMY_PROGRAM_FN
       )
-    # Mustn't use os.path.join here, because if the test suite is running on a
-    # Linux host, that would generate a bad path:
-    DUMMY_PROGRAM_PATH_GUEST = 'C:\\' + DUMMY_PROGRAM_FN
     if os.path.exists(DUMMY_PROGRAM_DEST_PATH_HOST):
         os.remove(DUMMY_PROGRAM_DEST_PATH_HOST)
+
+    DUMMY_PROGRAM_PATH_GUEST = site_config.guest_dest_dir + DUMMY_PROGRAM_FN
 
     print 'Copying dummy program to guest...'
     vm.copyFileFromHostToGuest(
