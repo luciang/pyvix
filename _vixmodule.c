@@ -29,7 +29,8 @@ static PyMethodDef vix_globalMethods[] = {
 DL_EXPORT(void)
 init_vixmodule(void) {
   PyObject *m;
-
+  Py_Initialize();
+  PyEval_InitThreads();
   m = Py_InitModule("_vixmodule", vix_globalMethods);
   if (m == NULL) { goto fail; }
 
