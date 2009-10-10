@@ -1,0 +1,8 @@
+- Release 2006.07.18:
+  BUG FIXES:
+    - Eric Buehl contributed fixes for the build process on *nix, and a change
+      to test case test_VM_loginInGuest_plusCopyAndRun that allows it to run
+      on *nix hosts.
+
+
+- Release 2006.06.27: (Initial release.)
