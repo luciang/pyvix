@@ -1,3 +1,5 @@
+#!/usr/bin/py.test
+
 import os, os.path, sys, tempfile, time
 
 import py.test

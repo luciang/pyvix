@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 # pyvix - Main Entry Point to VIX Functionality
 # Copyright 2006 David S. Rushby
 # Available under the MIT license (see docs/license.txt for details).

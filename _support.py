@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 # pyvix - Miscellaneous Utility Code
 # Copyright 2006 David S. Rushby
 # Available under the MIT license (see docs/license.txt for details).

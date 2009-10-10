@@ -1,3 +1,5 @@
+#!/usr/bin/py.test
+
 import py.test
 
 import _support

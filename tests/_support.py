@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 import os, os.path, re, sys
 import distutils.util
 
