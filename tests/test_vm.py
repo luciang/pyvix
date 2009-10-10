@@ -237,9 +237,9 @@ def test_VM_loginInGuest_plusCopyAndRun():
     vm.loginInGuest(site_config.guest_username, site_config.guest_password)
     print 'Logged into guest.'
 
-    # Copy an innocuous batch file from the host to the guest, execute it, then
+    # Copy an innocuous test file from the host to the guest, execute it, then
     # copy it back to the host and verify its presence and contents.
-    DUMMY_PROGRAM_FN = 'pyvix_test_program__hello.bat'
+    DUMMY_PROGRAM_FN = site_config.guest_test_execution_program
     DUMMY_PROGRAM_SOURCE_PATH_HOST = os.path.join(
         os.path.dirname(__file__), 'data', DUMMY_PROGRAM_FN
       )

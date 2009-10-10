@@ -29,3 +29,10 @@ guest_password = 'so'
 guest_dest_dir = '/tmp/'
 # guest_dest_dir = 'C:\\' # this would be good on Windows
 
+
+# We need to test whether we can execute a file on the guest system.
+# This specifies the file from the HOST that will be sent to the guest
+# and executed. This file must exist in the ./data subdirectory.
+guest_test_execution_program = 'pyvix_test_program__hello.py'
+# guest_test_execution_program = 'pyvix_test_program__hello.bat' # this would be good on Windows
+
