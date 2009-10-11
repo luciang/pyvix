@@ -768,12 +768,17 @@ static PyObject *pyf_VM_vmxPath_get(VM *self, void *closure) {
   PyObject * pyVmxPath;
 
   if (self->vmxPath == NULL)
-    return Py_None;
+    goto fail;
 
   pyVmxPath = Py_BuildValue("s", self->vmxPath);
   if (pyVmxPath == NULL)
-    return Py_None;
+    goto fail;
+
   return pyVmxPath;
+
+ fail:
+    Py_INCREF(Py_None);
+    return Py_None;
 } /* pyf_VM_vmxPath_get */
 
 
