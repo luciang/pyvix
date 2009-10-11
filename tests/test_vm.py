@@ -68,6 +68,10 @@ def test_Host_close_explicit_withOpenVM():
     assert vm.host is None
 
 def test_VM_powerOnPowerOffAndSuspend(actionWhilePoweredOn=None):
+    # XXX: TODO: not all this test needs to be skipped, just the
+    # suspend+poweron part.
+    if site_config.skip_tests_that_end_in_segmentation_fault:
+        return None
     h, vm = _openGenericVM()
 
     # If the VM is already powered off, it should object to an attempt to power

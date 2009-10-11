@@ -11,6 +11,8 @@ def test_Host_connect_noArgs():
     h = Host()
 
 def test_Host_connect_badSecurityInfo():
+    if site_config.skip_tests_bad_credentials_host_authentification:
+        return None
     # With the host name specified but security information missing (or bogus),
     # should fail with VIXSecurityException:
     py.test.raises(VIXSecurityException, Host,
