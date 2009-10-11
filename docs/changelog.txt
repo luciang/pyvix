@@ -1,3 +1,20 @@
+- Release 2009.10.11:
+  BUG FIXES:
+    - Lucian Adrian Grijincu contributed these fixes:
+      upgrade to new vix.h: rename XXX_PROHIBITED_ON* to XXX_PROHIBITED
+      call python initializers
+      dos2unix + shebang
+      .gitignore
+      add a default pyvix_test_site_config file
+      add more configurable test elements
+      make file used in testing guest file ops configurable
+      skip some blocker tests that are caused by libvmware-vix.so
+      add readme (building, installing and testing)
+      readme: note about compiler versions
+      test_vm: poweroff the vm before removing snapshots
+      test_vm: make the upgdare hardware configurable
+      tests: import site_config
+
 - Release 2006.07.18:
   BUG FIXES:
     - Eric Buehl contributed fixes for the build process on *nix, and a change
