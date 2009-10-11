@@ -1,3 +1,12 @@
+pyvix is a Python wrapper for the VMWare VIX C API that allows Python
+to programmatically control VMWare virtual machines.
+
+Example operations include:
+ - powering on/off;
+ - suspending;
+ - creating, reverting to, and removing snapshots;
+ - sending/receiving files to/from the virtual machine;
+ - running programs on the virtual machine.
 
 
 = Build and install =
