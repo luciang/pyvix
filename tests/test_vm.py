@@ -5,6 +5,7 @@ import os, os.path, sys, tempfile, time
 import py.test
 
 import _support
+import pyvix_test_site_config as site_config
 from pyvix.vix import *
 
 def _openGenericVM():
