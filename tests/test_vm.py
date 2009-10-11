@@ -222,13 +222,12 @@ def test_VM_upgradeVirtualHardware():
         vm.powerOff()
         print 'VM powered off.'
 
-    print 'Calling upgradeVirtualHardware...'
-    # XXX: In VMWare Server 1.0RC1, this is supposed to raise an exception if
-    # the virtual hardware is already up to date.  Instead, it raises an
-    # internal error and shows an error message in the friggin VMWare Console
-    # GUI.
-    vm.upgradeVirtualHardware()
-    print 'upgradeVirtualHardware complete.'
+    if site_config.hardware_is_upgradable:
+        vm.upgradeVirtualHardware()
+    else:
+        print 'Calling upgradeVirtualHardware...'
+        py.test.raises(VIXException, vm.upgradeVirtualHardware)
+        print 'upgradeVirtualHardware complete.'
 
 def test_VM_loginInGuest_plusCopyAndRun():
     h, vm = _openGenericVM()

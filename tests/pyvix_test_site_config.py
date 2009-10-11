@@ -78,3 +78,15 @@ skip_tests_that_end_in_segmentation_fault = True
 
 skip_tests_bad_credentials_host_authentification = True
 
+
+
+
+
+# In VMWare Server 1.0RC1, this is supposed to raise an exception if
+# the virtual hardware is already up to date. Instead, it raises an
+# internal error and shows an error message in the friggin VMWare
+# Console GUI.
+#
+# Put this to True if you know your vmware hardware is upgradable.
+hardware_is_upgradable = False
+
