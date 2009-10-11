@@ -36,6 +36,7 @@ static PyObject *pyf_VM_new(
 
   /* Initialize VM-specific fields: */
   self->host = NULL;
+  self->vmxPath = NULL;
 
   return (PyObject *) self;
   fail:
@@ -57,8 +58,15 @@ static status VM_init(VM *self, PyObject *args) {
   assert (self->host == NULL);
   Py_INCREF(host);
   self->host = host;
-
+  assert (self->vmxPath == NULL);
   assert (self->handle == VIX_INVALID_HANDLE);
+
+  LEAVE_PYTHON
+  self->vmxPath = strdup(vmxPath);
+  ENTER_PYTHON
+
+  if (self->vmxPath == NULL) { Py_DECREF(host); self->host = NULL; goto fail; }
+
   LEAVE_PYTHON
   jobH = VixVM_Open(host->handle, vmxPath, NULL, NULL);
   err = VixJob_Wait(jobH, VIX_PROPERTY_JOB_RESULT_HANDLE, &self->handle,
@@ -76,6 +84,8 @@ static status VM_init(VM *self, PyObject *args) {
   res = SUCCEEDED;
   goto cleanup;
   fail:
+    if(self && self->vmxPath)
+      free(self->vmxPath);
     assert (PyErr_Occurred());
     assert (res == FAILED);
     /* Fall through to cleanup: */
@@ -131,6 +141,7 @@ static status VM_close_withUnlink(VM *self, bool allowedToRaise) {
   }
 
   VM_clearHostReferences(self);
+  free(self->vmxPath); self->vmxPath = NULL;
 
   assert (VM_hasBeenUntracked(self));
   return SUCCEEDED;
@@ -159,6 +170,7 @@ static status VM_untrack(VM *self, bool allowedToRaise) {
   assert (!VM_isOpen(self));
 
   VM_clearHostReferences(self);
+  free(self->vmxPath); self->vmxPath = NULL;
   assert (VM_hasBeenUntracked(self));
 
   return SUCCEEDED;
@@ -751,6 +763,20 @@ static PyObject *pyf_VM_rootSnapshots_get(VM *self, void *closure) {
     return NULL;
 } /* pyf_VM_rootSnapshots_get */
 
+
+static PyObject *pyf_VM_vmxPath_get(VM *self, void *closure) {
+  PyObject * pyVmxPath;
+
+  if (self->vmxPath == NULL)
+    return Py_None;
+
+  pyVmxPath = Py_BuildValue("s", self->vmxPath);
+  if (pyVmxPath == NULL)
+    return Py_None;
+  return pyVmxPath;
+} /* pyf_VM_vmxPath_get */
+
+
 static PyMethodDef VM_methods[] = {
     {"close",
         (PyCFunction) pyf_VM_close,
@@ -845,6 +871,11 @@ static PyGetSetDef VM_getters_setters[] = {
         NULL,
         "A list of Snapshot objects that represent the root snapshots in this"
         " VM."
+      },
+    {"vmxPath",
+       (getter) pyf_VM_vmxPath_get,
+        NULL,
+        "The path to the corresponding vmx for this virtual machine."
       },
     {NULL}  /* sentinel */
   };

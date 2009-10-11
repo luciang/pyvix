@@ -134,6 +134,7 @@ typedef struct _VM {
 
   Host *host;
   struct _SnapshotTracker *openSnapshots;
+  char * vmxPath;
 } VM;
 extern PyTypeObject VMType;
 DEFINE_TRACKER_TYPES(VM)

@@ -4,7 +4,7 @@
 # Copyright 2006 David S. Rushby
 # Available under the MIT license (see docs/license.txt for details).
 
-__timestamp__ = '2006.07.18.14.38.24.UTC'
+__timestamp__ = '2009.10.11.13.26.17.UTC'
 
 import os
 

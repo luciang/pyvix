@@ -13,6 +13,7 @@ def _openGenericVM():
     vm = _reopenGenericVMOnHost(h)
     return h, vm
 
+
 def _reopenGenericVMOnHost(h):
     return h.openVM(_support.site_config.generic_vmx)
 
@@ -28,6 +29,10 @@ def test_VM_creation_delVMFirst():
     assert vm.host is h
     del vm
     del h
+
+def test_VM_vmxPath():
+    h, vm = _openGenericVM()
+    assert vm.vmxPath == site_config.generic_vmx
 
 def test_VM_propertyRetrieval():
     # XXX: Ought to expand this test.
