@@ -3,6 +3,11 @@
 = Build and install =
 rm -rdf build/; python setup.py build; python setup.py install
 
+Note that `python setup.py build` will call gcc to build the Python
+extension module and link it to libvmware-vix.so. Make sure you use
+the same compiler version for both libvmware-vix.so and the extension.
+I "solved" some Segmentation Faults by matching the compiler versions.
+
 = Run tests =
 a) /usr/bin/py.test
    - this will run all tests in tests/
@@ -12,3 +17,5 @@ a) /usr/bin/py.test
 b) gdb --args /usr/bin/python /usr/bin/py.test tests/test_vm.py -s -v
    - run it like this under gdb: it needs as first argument a binary
     executable, not a script.
+
+
