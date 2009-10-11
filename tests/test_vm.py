@@ -171,6 +171,9 @@ def test_snapshotOps():
         vm = _reopenGenericVMOnHost(h)
         assert vm.host is h
 
+        if vm[VIX_PROPERTY_VM_POWER_STATE] & VIX_POWERSTATE_POWERED_ON != 0:
+            vm.powerOff()
+
         snaps = vm.rootSnapshots
         # Remove all existing snapshots:
         for i, s in enumerate(snaps):
@@ -189,6 +192,12 @@ def test_snapshotOps():
     print 'Reverting to snapshot...'
     vm.revertToSnapshot(s)
     print 'Reverted to snapshot.'
+
+    print 'Powerring off...'
+    if vm[VIX_PROPERTY_VM_POWER_STATE] & VIX_POWERSTATE_POWERED_ON != 0:
+        vm.powerOff()
+    print 'Powered off.'
+
     assert not s.closed
     assert s.vm is vm
 
