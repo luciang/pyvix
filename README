@@ -1,0 +1,14 @@
+
+
+= Build and install =
+rm -rdf build/; python setup.py build; python setup.py install
+
+= Run tests =
+a) /usr/bin/py.test
+   - this will run all tests in tests/
+   - add "-v" to see the actual tests
+   - add "-s" to see printf() from the C extensions and print from Python
+
+b) gdb --args /usr/bin/python /usr/bin/py.test tests/test_vm.py -s -v
+   - run it like this under gdb: it needs as first argument a binary
+    executable, not a script.
