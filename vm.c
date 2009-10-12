@@ -653,6 +653,43 @@ static PyObject *pyf_VM_copyFileFromGuestToHost(VM *self, PyObject *args) {
   return pyf_VM_copyFile(self, args, false);
 } /* pyf_VM_copyFileFromGuestToHost */
 
+
+
+struct runProgramCallbackData {
+  PyObject * funcPtr;
+  PyObject * funcArg;
+};
+
+
+static void runProgramInGuestCallback(VixHandle handle,
+				      VixEventType eventType,
+				      VixHandle moreEventInfo,
+				      void *clientData)
+{
+  struct runProgramCallbackData * cbackData = (struct runProgramCallbackData*) clientData;
+  PyObject *result = NULL;
+  PyObject *args = NULL;
+  PyGILState_STATE gstate;
+
+  if (eventType != VIX_EVENTTYPE_JOB_COMPLETED)
+    return;
+
+  ENTER_PYTHON_WITHOUT_CODE_BLOCK(gstate);
+
+  // Python expects a tuple, we can't just pass the cbackData->funcArg
+  args = Py_BuildValue("(O)", cbackData->funcArg);
+  Py_DECREF(cbackData->funcArg);
+  result = PyObject_CallObject(cbackData->funcPtr, args);
+  Py_XDECREF(result);
+  Py_XDECREF(args);
+  Py_DECREF(cbackData->funcPtr);
+
+  LEAVE_PYTHON_WITHOUT_CODE_BLOCK(gstate);
+  pyvix_plain_free(cbackData);
+}
+
+
+
 static PyObject *pyf_VM_runProgramInGuest(VM *self, PyObject *args) {
   VixHandle jobH = VIX_INVALID_HANDLE;
   VixError err;
@@ -660,19 +697,36 @@ static PyObject *pyf_VM_runProgramInGuest(VM *self, PyObject *args) {
 
   char *progPath;
   char *commandLine;
-
+  PyObject *funcPtr = NULL;
+  PyObject *funcArg = NULL;
+  VixEventProc * cback = NULL;
+  struct runProgramCallbackData * cbackData = NULL;
   VM_REQUIRE_OPEN(self);
 
-  if (!PyArg_ParseTuple(args, "ss", &progPath, &commandLine)) { goto fail; }
+  if (!PyArg_ParseTuple(args, "ss|OO", &progPath, &commandLine, &funcPtr, &funcArg)) {
+    goto fail;
+  }
 
   LEAVE_PYTHON
+
+  if (funcPtr != NULL) {
+    cback = runProgramInGuestCallback;
+    cbackData = pyvix_plain_malloc(sizeof(*cbackData));
+    Py_XINCREF(funcPtr);
+    cbackData->funcPtr = funcPtr;
+
+    if (funcArg == NULL)
+      funcArg = Py_None;
+    Py_XINCREF(funcArg);
+    cbackData->funcArg = funcArg;
+  }
+
   jobH = VixVM_RunProgramInGuest(self->handle,
       progPath, commandLine,
       0, /* options */
-      /* propertyList:  Must be VIX_INVALID_HANDLE in current release: */
-      VIX_INVALID_HANDLE,
-      NULL, /* callbackProc */
-      NULL  /* clientData */
+      VIX_INVALID_HANDLE, /* propertyList:  Must be VIX_INVALID_HANDLE in current release: */
+      cback, /* callbackProc */
+      cbackData /* clientData */
     );
   err = VixJob_Wait(jobH, VIX_PROPERTY_NONE);
   ENTER_PYTHON
@@ -682,6 +736,9 @@ static PyObject *pyf_VM_runProgramInGuest(VM *self, PyObject *args) {
   Py_INCREF(Py_None);
   goto cleanup;
   fail:
+    Py_XDECREF(funcArg);
+    Py_XDECREF(funcPtr);
+    pyvix_plain_free(cbackData);
     assert (PyErr_Occurred());
     assert (pyRes == NULL);
     /* Fall through to cleanup: */

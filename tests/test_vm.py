@@ -235,6 +235,11 @@ def test_VM_upgradeVirtualHardware():
         py.test.raises(VIXException, vm.upgradeVirtualHardware)
         print 'upgradeVirtualHardware complete.'
 
+
+
+def _callback(param):
+    print '--> Callback successfully called. Param is:', param
+
 def test_VM_loginInGuest_plusCopyAndRun():
     h, vm = _openGenericVM()
 
@@ -276,6 +281,10 @@ def test_VM_loginInGuest_plusCopyAndRun():
 
     print 'Running dummy program on guest...'
     vm.runProgramInGuest(DUMMY_PROGRAM_PATH_GUEST, 'David Rushby')
+
+
+    print 'Running dummy program on guest, with callback...'
+    vm.runProgramInGuest(DUMMY_PROGRAM_PATH_GUEST, 'David Rushby', _callback, 'SuperCallbackWorks')
 
     assert not os.path.exists(DUMMY_PROGRAM_DEST_PATH_HOST)
     print 'Copying dummy program back from guest to host...'
