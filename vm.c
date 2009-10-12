@@ -690,20 +690,23 @@ static void runProgramInGuestCallback(VixHandle handle,
 
 
 
-static PyObject *pyf_VM_runProgramInGuest(VM *self, PyObject *args) {
+static PyObject *pyf_VM_runProgramInGuest(VM *self, PyObject *args, PyObject *keywds) {
   VixHandle jobH = VIX_INVALID_HANDLE;
   VixError err;
   PyObject *pyRes = NULL;
 
   char *progPath;
-  char *commandLine;
+  char *progArg;
   PyObject *funcPtr = NULL;
   PyObject *funcArg = NULL;
+  int options = 0;
+
   VixEventProc * cback = NULL;
   struct runProgramCallbackData * cbackData = NULL;
   VM_REQUIRE_OPEN(self);
-
-  if (!PyArg_ParseTuple(args, "ss|OO", &progPath, &commandLine, &funcPtr, &funcArg)) {
+  static char *kwlist[] = {"prog", "progArg", "options", "cback", "cbackArg", NULL};
+  if (! PyArg_ParseTupleAndKeywords(args, keywds, "ss|iOO", kwlist,
+				    &progPath, &progArg, &options, &funcPtr, &funcArg)) {
     goto fail;
   }
 
@@ -722,8 +725,8 @@ static PyObject *pyf_VM_runProgramInGuest(VM *self, PyObject *args) {
   }
 
   jobH = VixVM_RunProgramInGuest(self->handle,
-      progPath, commandLine,
-      0, /* options */
+      progPath, progArg,
+      options,
       VIX_INVALID_HANDLE, /* propertyList:  Must be VIX_INVALID_HANDLE in current release: */
       cback, /* callbackProc */
       cbackData /* clientData */
@@ -906,7 +909,7 @@ static PyMethodDef VM_methods[] = {
       },
     {"runProgramInGuest",
         (PyCFunction) pyf_VM_runProgramInGuest,
-        METH_VARARGS
+        METH_VARARGS | METH_KEYWORDS
       },
     {NULL}  /* sentinel */
   };

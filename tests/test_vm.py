@@ -279,12 +279,21 @@ def test_VM_loginInGuest_plusCopyAndRun():
         DUMMY_PROGRAM_SOURCE_PATH_HOST, DUMMY_PROGRAM_PATH_GUEST
       )
 
-    print 'Running dummy program on guest...'
+
+    print 'Running dummy program on guest - no kwargs'
     vm.runProgramInGuest(DUMMY_PROGRAM_PATH_GUEST, 'David Rushby')
+    print 'Running dummy program on guest - with kwargs'
+    vm.runProgramInGuest(prog=DUMMY_PROGRAM_PATH_GUEST, progArg='some')
+    print 'Running dummy program on guest - with options=VIX_RUNPROGRAM_RETURN_IMMEDIATELY'
+    vm.runProgramInGuest(prog=DUMMY_PROGRAM_PATH_GUEST, progArg='random',   options=VIX_RUNPROGRAM_RETURN_IMMEDIATELY)
+    print 'Running dummy program on guest - with options=VIX_RUNPROGRAM_RETURN_IMMEDIATELY and callback'
+    vm.runProgramInGuest(prog=DUMMY_PROGRAM_PATH_GUEST, progArg='cmdline',  options=VIX_RUNPROGRAM_RETURN_IMMEDIATELY, cback=_callback)
+    print 'Running dummy program on guest - with options=VIX_RUNPROGRAM_RETURN_IMMEDIATELY and callback and callbackArg'
+    vm.runProgramInGuest(prog=DUMMY_PROGRAM_PATH_GUEST, progArg='argument', options=VIX_RUNPROGRAM_RETURN_IMMEDIATELY, cback=_callback, cbackArg='Super cbackArg')
+    print 'Running dummy program on guest - with zero options=0, callback and callbackArg'
+    vm.runProgramInGuest(prog=DUMMY_PROGRAM_PATH_GUEST, progArg='argument', options=0, cback=_callback, cbackArg='Super cbackArg')
 
 
-    print 'Running dummy program on guest, with callback...'
-    vm.runProgramInGuest(DUMMY_PROGRAM_PATH_GUEST, 'David Rushby', _callback, 'SuperCallbackWorks')
 
     assert not os.path.exists(DUMMY_PROGRAM_DEST_PATH_HOST)
     print 'Copying dummy program back from guest to host...'
