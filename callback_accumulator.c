@@ -1,10 +1,11 @@
 /******************************************************************************
  * pyvix - Implementation of VixCallbackAccumulator Type
  * Copyright 2006 David S. Rushby
+* Copyright 2008 Adam Pridgen Adam.Pridgen@[foundstone.com || gmail.com]
  * Available under the MIT license (see docs/license.txt for details).
  *****************************************************************************/
 
-static status VixCallbackAccumulator_init(VixCallbackAccumulator *acc) {
+static status VixCallbackAccumulator_ListInit(VixCallbackAccumulator *acc) {
   assert (acc != NULL);
 
   acc->target = PyList_New(0);
@@ -14,7 +15,20 @@ static status VixCallbackAccumulator_init(VixCallbackAccumulator *acc) {
   fail:
     assert (PyErr_Occurred());
     return FAILED;
-} /* VixCallbackAccumulator_init */
+} /* VixCallbackAccumulator_ListInit */
+
+static status VixCallbackAccumulator_TupleInit(VixCallbackAccumulator *acc, unsigned int items) {
+  assert (acc != NULL);
+
+  acc->target = PyTuple_New(items);
+  if (acc->target == NULL) { goto fail; }
+
+  return SUCCEEDED;
+  fail:
+    assert (PyErr_Occurred());
+    return FAILED;
+} /* VixCallbackAccumulator_Tuplenit */
+
 
 static status VixCallbackAccumulator_clear(VixCallbackAccumulator *acc) {
   assert (acc != NULL);

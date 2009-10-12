@@ -161,7 +161,7 @@ static PyObject *pyf_Host_findRunningVMPaths(Host *self) {
 
   HOST_REQUIRE_OPEN(self);
 
-  if (VixCallbackAccumulator_init(&acc) != SUCCEEDED) { goto fail; }
+  if (VixCallbackAccumulator_ListInit(&acc) != SUCCEEDED) { goto fail; }
 
   LEAVE_PYTHON
   jobH = VixHost_FindItems(self->handle, VIX_FIND_RUNNING_VMS,
