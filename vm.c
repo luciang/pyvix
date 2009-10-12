@@ -1,6 +1,8 @@
 /******************************************************************************
  * pyvix - Implementation of VM Class
  * Copyright 2006 David S. Rushby
+ * Copyright 2008 Adam Pridgen
+ * Copyright 2009 Lucian Adrian Grijincu
  * Available under the MIT license (see docs/license.txt for details).
  *****************************************************************************/
 
@@ -198,18 +200,29 @@ static void pyf_VM___del__(VM *self) {
   self->ob_type->tp_free((PyObject *) self);
 } /* pyf_VM___del__ */
 
-static PyObject *pyf_VM_powerOnOrOff(VM *self, bool shouldPowerOn) {
+static PyObject *pyf_VM_powerOnOrOff(VM *self, PyObject *args, bool shouldPowerOn) {
   VixHandle jobH = VIX_INVALID_HANDLE;
   VixError err = VIX_OK;
   PyObject *pyRes = NULL;
+  int options = VIX_VMPOWEROP_NORMAL;
 
   VM_REQUIRE_OPEN(self);
 
+  if (!PyArg_ParseTuple(args, "|i" , &options)) { goto fail; }
+
+  if (options != VIX_VMPOWEROP_NORMAL
+      // ugly, I know. :(
+#if defined VIX_VMPOWEROP_LAUNCH_GUI
+ && options != VIX_VMPOWEROP_LAUNCH_GUI
+#endif
+      ) {
+    options = VIX_VMPOWEROP_NORMAL;
+  }
   LEAVE_PYTHON
+
+
   if (shouldPowerOn) {
-    jobH = VixVM_PowerOn(self->handle, VIX_VMPOWEROP_NORMAL,
-        VIX_INVALID_HANDLE, NULL, NULL
-      );
+    jobH = VixVM_PowerOn(self->handle, options, VIX_INVALID_HANDLE, NULL, NULL);
   } else {
     jobH = VixVM_PowerOff(self->handle, 0, NULL, NULL);
   }
@@ -229,12 +242,12 @@ static PyObject *pyf_VM_powerOnOrOff(VM *self, bool shouldPowerOn) {
     return pyRes;
 } /* pyf_VM_powerOn */
 
-static PyObject *pyf_VM_powerOn(VM *self) {
-  return pyf_VM_powerOnOrOff(self, true);
+static PyObject *pyf_VM_powerOn(VM *self, PyObject *args) {
+  return pyf_VM_powerOnOrOff(self, args, true);
 } /* pyf_VM_powerOn */
 
-static PyObject *pyf_VM_powerOff(VM *self) {
-  return pyf_VM_powerOnOrOff(self, false);
+static PyObject *pyf_VM_powerOff(VM *self, PyObject *args) {
+  return pyf_VM_powerOnOrOff(self, args, false);
 } /* pyf_VM_powerOn */
 
 static PyObject *pyf_VM_reset(VM *self) {
@@ -849,11 +862,11 @@ static PyMethodDef VM_methods[] = {
       },
     {"powerOn",
         (PyCFunction) pyf_VM_powerOn,
-        METH_NOARGS
+        METH_VARARGS
       },
     {"powerOff",
         (PyCFunction) pyf_VM_powerOff,
-        METH_NOARGS
+        METH_VARARGS
       },
     {"reset",
         (PyCFunction) pyf_VM_reset,
