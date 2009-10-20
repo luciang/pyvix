@@ -618,15 +618,17 @@ static PyObject *pyf_VM_revertToSnapshot(VM *self, PyObject *args) {
   VixError err;
 
   Snapshot *pySnap;
-
+  int options = VIX_VMPOWEROP_NORMAL;
   VM_REQUIRE_OPEN(self);
 
-  if (!PyArg_ParseTuple(args, "O!", &SnapshotType, &pySnap)) { goto fail; }
+  if (!PyArg_ParseTuple(args, "O!|i", &SnapshotType, &pySnap, &options)) { goto fail; }
+  if (options & VIX_VMPOWEROP_SUPPRESS_SNAPSHOT_POWERON)
+    options = VIX_VMPOWEROP_SUPPRESS_SNAPSHOT_POWERON;
 
   LEAVE_PYTHON
   jobH = VixVM_RevertToSnapshot(self->handle,
       pySnap->handle,
-      0, /* options:  Must be 0 in current release. */
+      options,
       /* propertyListHandle:  Must be VIX_INVALID_HANDLE in current release: */
       VIX_INVALID_HANDLE,
       NULL, /* callbackProc */
