@@ -495,6 +495,85 @@ static PyObject *pyf_VM_createSnapshot(VM *self,
     return pySnap;
 } /* pyf_VM_createSnapshot */
 
+static PyObject *pyf_VM_getNamedSnapshot(VM *self, PyObject *args)
+{
+  VixError err;
+  PyObject *pySnap = NULL;
+  VixHandle snapH;
+
+  char *snapshotname = NULL;
+
+  VM_REQUIRE_OPEN(self);
+
+  if (!PyArg_ParseTuple(args, "s", &snapshotname)) { goto fail; }
+
+  LEAVE_PYTHON
+  err = VixVM_GetNamedSnapshot(self->handle, snapshotname, &snapH);
+  ENTER_PYTHON
+  CHECK_VIX_ERROR(err);
+
+  assert (snapH != VIX_INVALID_HANDLE);
+  pySnap = PyObject_CallFunction((PyObject *) &SnapshotType,
+      "Oi", self, snapH);
+  /* If the creation of pySnap succeeded, the Snapshot instance now owns snapH;
+   * if the creation failed, we need to release snapH: */
+  if (pySnap == NULL) {
+    Vix_ReleaseHandle(snapH);
+    goto fail;
+  }
+
+  goto cleanup;
+ fail:
+  assert (PyErr_Occurred());
+  if (pySnap != NULL) {
+    Py_XDECREF(pySnap);
+  }
+  pySnap = Py_None;
+  Py_INCREF(Py_None);
+  /* Fall through to cleanup: */
+ cleanup:
+  return pySnap;
+} /* pyf_VM_getNamedSnapshot */
+
+static PyObject *pyf_VM_getCurrentSnapshot(VM *self, PyObject *args)
+{
+  VixError err;
+  PyObject *pySnap = NULL;
+
+  VixHandle snapH;
+
+  VM_REQUIRE_OPEN(self);
+  LEAVE_PYTHON
+  err = VixVM_GetCurrentSnapshot(self->handle, &snapH);
+  ENTER_PYTHON
+  CHECK_VIX_ERROR(err);
+
+  assert (snapH != VIX_INVALID_HANDLE);
+  pySnap = PyObject_CallFunction((PyObject *) &SnapshotType,
+      "O" VixHandle_FUNCTION_CALL_CODE, self, snapH);
+  /* If the creation of pySnap succeeded, the Snapshot instance now owns snapH;
+   * if the creation failed, we need to release snapH: */
+  if (pySnap == NULL) {
+    Vix_ReleaseHandle(snapH);
+    goto fail;
+  }
+
+  goto cleanup;
+ fail:
+  assert (PyErr_Occurred());
+  if (pySnap != NULL) {
+    Py_XDECREF(pySnap);
+  }
+  pySnap = Py_None;
+  Py_INCREF(Py_None);
+
+  /* Fall through to cleanup: */
+ cleanup:
+  return pySnap;
+} /* pyf_VM_getCurrentSnapshot */
+
+
+
 static PyObject *pyf_VM_removeSnapshot(VM *self, PyObject *args) {
   PyObject *pyRes = NULL;
   VixHandle jobH = VIX_INVALID_HANDLE;
@@ -897,6 +976,18 @@ static PyMethodDef VM_methods[] = {
          * about that: */
         (PyCFunction) pyf_VM_createSnapshot,
         METH_VARARGS | METH_KEYWORDS,
+      },
+    {"getCurrentSnapshot",
+        /* It should actually be PyCFunctionWithKeywords, but GCC grumbles
+	 * about that: */
+        (PyCFunction) pyf_VM_getCurrentSnapshot,
+        METH_VARARGS
+      },
+    {"getNamedSnapshot",
+        /* It should actually be PyCFunctionWithKeywords, but GCC grumbles
+	 * about that: */
+        (PyCFunction) pyf_VM_getNamedSnapshot,
+        METH_VARARGS
       },
     {"removeSnapshot",
         (PyCFunction) pyf_VM_removeSnapshot,

@@ -187,6 +187,25 @@ def test_snapshotOps():
             vm.removeSnapshot(s)
             print 'Removed initial snapshot #%d' % (i + 1)
 
+    snapname = 'snapName'
+    print 'Creating named snapshot...'
+    s = vm.createSnapshot(name=snapname)
+
+    print 'Powerring off...'
+    if vm[VIX_PROPERTY_VM_POWER_STATE] & VIX_POWERSTATE_POWERED_ON != 0:
+        vm.powerOff()
+    ss = vm.getNamedSnapshot(snapname)
+    if None == ss:
+        print '---> no snapshot named ', snapname
+    else:
+        assert not ss.closed
+        assert ss.vm is vm
+        ss.close()
+
+    print 'Removing named snapshot...'
+    vm.removeSnapshot(s)
+    s.close()
+
     print 'Creating snapshot...'
     s = vm.createSnapshot()
     print 'Snapshot created; VM now has %d snapshots.' % vm.nRootSnapshots
@@ -199,10 +218,11 @@ def test_snapshotOps():
     vm.revertToSnapshot(s)
     print 'Reverted to snapshot.'
 
-    print 'Powerring off...'
-    if vm[VIX_PROPERTY_VM_POWER_STATE] & VIX_POWERSTATE_POWERED_ON != 0:
-        vm.powerOff()
-    print 'Powered off.'
+    print 'Getting current snapshot...'
+    curSnap = vm.getCurrentSnapshot()
+    assert not curSnap.closed
+    assert curSnap.vm is vm
+    curSnap.close()
 
     assert not s.closed
     assert s.vm is vm
