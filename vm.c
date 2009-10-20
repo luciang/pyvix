@@ -580,15 +580,19 @@ static PyObject *pyf_VM_removeSnapshot(VM *self, PyObject *args) {
   VixError err;
 
   Snapshot *pySnap;
+  int options = 0;
 
   VM_REQUIRE_OPEN(self);
 
-  if (!PyArg_ParseTuple(args, "O!", &SnapshotType, &pySnap)) { goto fail; }
+  if (!PyArg_ParseTuple(args, "O!|i", &SnapshotType, &pySnap, &options)) { goto fail; }
+
+  if (options != 0 && options != VIX_SNAPSHOT_REMOVE_CHILDREN)
+    options = 0;
 
   LEAVE_PYTHON
   jobH = VixVM_RemoveSnapshot(self->handle,
       pySnap->handle,
-      0, /* options:  Must be 0 in current release. */
+      options,
       NULL, /* callbackProc */
       NULL  /* clientData */
     );
