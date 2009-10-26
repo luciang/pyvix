@@ -586,7 +586,9 @@ static PyObject *pyf_VM_removeSnapshot(VM *self, PyObject *args) {
 
   if (!PyArg_ParseTuple(args, "O!|i", &SnapshotType, &pySnap, &options)) { goto fail; }
 
+#ifdef VIX_SNAPSHOT_REMOVE_CHILDREN
   if (options != 0 && options != VIX_SNAPSHOT_REMOVE_CHILDREN)
+#endif
     options = 0;
 
   LEAVE_PYTHON
@@ -622,8 +624,12 @@ static PyObject *pyf_VM_revertToSnapshot(VM *self, PyObject *args) {
   VM_REQUIRE_OPEN(self);
 
   if (!PyArg_ParseTuple(args, "O!|i", &SnapshotType, &pySnap, &options)) { goto fail; }
+#ifdef VIX_VMPOWEROP_SUPPRESS_SNAPSHOT_POWERON
   if (options & VIX_VMPOWEROP_SUPPRESS_SNAPSHOT_POWERON)
     options = VIX_VMPOWEROP_SUPPRESS_SNAPSHOT_POWERON;
+#else
+    options = 0;
+#endif
 
   LEAVE_PYTHON
   jobH = VixVM_RevertToSnapshot(self->handle,
