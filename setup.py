@@ -169,7 +169,7 @@ else:
 
 if not PLATFORM_IS_WINDOWS:
     includeDirs.append('/usr/include/vmware-vix')
-    libNames.append('vmware-vix')
+    libNames.append('vixAllProducts')
 
 
 extensionModules.append(
